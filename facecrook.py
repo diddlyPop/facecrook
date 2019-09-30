@@ -9,14 +9,16 @@ packet sniffing for pictures of faces
 from scapy.all import *
 import zlib, scipy, numpy, re
 
+
 def get_http_headers(g_http_payload):
     try:
+
         g_headers_raw = g_http_payload[:g_http_payload.index("\\r\\n\\r\\n")+4]
-        print("passes raw state: " + g_headers_raw)
+        if g_headers_raw is not None:
+            print("raw: " + g_headers_raw)
         g_headers = dict(re.findall(r"(?P<name>.*?): (?P<value>.*?)\\r\\n", g_headers_raw))
-        print("g_header: " + g_headers.keys())
-    except:
-        print("raw with error: " + g_http_payload)
+        print("headders: " + str(g_headers.keys()))
+    except Exception as e:
         return None
     if 'Content-Type' not in g_headers:
         return None
@@ -30,7 +32,8 @@ def extract_image(headers, http_payload):
     try:
         if 'image' in headers['Content-Type']:
             image_type = headers['Content-Type'].split('/')[1]
-            image = http_payload[http_payload.index('\r\n\r\n')+4:]
+            image = http_payload[http_payload.index('\\r\\n\\r\\n')+8:]
+            print("image: " + image)
             try:
                 if 'Content-Encoding' in headers.keys():
                     if headers['Content-Encoding'] == 'gzip':
@@ -60,15 +63,17 @@ packets = rdpcap("packets.pcap")
 
 sessions = packets.sessions()
 
+carved_images = 0
 
+PIC_DIR = "C:\\Users\\USER\\Desktop\\facecrook\\pictures"  # change to your windows user folder
 
 for session in sessions:
-    http_payload = ""
+    http_payload = ''
     for packet in sessions[session]:
         try:
             if packet[TCP].dport == 80 or packet[TCP].sport == 80:
                 http_payload += str(packet[TCP].payload)
-        except:
+        except Exception as e:
             pass
         headers = get_http_headers(http_payload)
         if headers is None:
@@ -76,28 +81,11 @@ for session in sessions:
         image, image_type = extract_image(headers, http_payload)
         if image is not None and image_type is not None:
             print("FOUND IMAGE")
+            file_name = '%s-pic_carver_%d.%s' % ("packets", carved_images, image_type)
+            fd = open('%s/%s' % (PIC_DIR, file_name), 'wb')
+            fd.write(image[2:].encode())
+            fd.close()
+            carved_images += 1
+
 
 # feed images to image classifier to determine if face
-
-
-
-
-'''
-I need a regex pattern to pull matches such as:
-
-Vary: Accept-Encoding\r\n
-Connection: Upgrade, Keep-Alive\r\n
-Server: Apache\r\n
-
-from the test sample:
-
-"b'HTTP/1.1 200 OK\r\nDate: Mon, 23 Sep 2019 08:25:40 GMT\r\nServer: Apache\r\nUpgrade: h2\r\nConnection: Upgrade, Keep-Alive\r\nVary: Accept-Encoding\r\nContent-Encoding: gzip\r\nContent-Length: 3578\r\nKeep-Alive: timeout=2, max=100\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n\x1f\x8b\x08\x00\x00\x00\x00\x00\x00"
-
-and my current pattern:
-
-(?P<name>.*?):(?P<value>.*?)\r\n
-
-doesnt seem to work
-
-
-'''
