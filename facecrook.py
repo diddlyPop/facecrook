@@ -7,7 +7,7 @@ packet sniffing for pictures of faces
 """
 
 from scapy.all import *
-import zlib, scipy, numpy, re
+import zlib, scipy, numpy, os, re
 
 
 def get_http_headers(g_http_payload):
@@ -65,7 +65,7 @@ sessions = packets.sessions()
 
 carved_images = 0
 
-PIC_DIR = "C:\\Users\\USER\\Desktop\\facecrook\\pictures"  # change to your windows user folder
+PIC_DIR = f"{os.environ['USERPROFILE']}/Desktop/Facecrook/Pictures" # pic output path
 
 for session in sessions:
     http_payload = ''
