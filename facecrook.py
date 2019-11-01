@@ -78,7 +78,7 @@ for session in sessions:
         image, image_type = extract_image(headers, http_payload)
         if image is not None and image_type is not None:
             print("FOUND IMAGE")
-            file_name = '{0}-pic_carver_{1}.{2}'.format("packets", carved_images, image_type)
+            file_name = '{0}-pic-{1}.{2}'.format("packets", carved_images, image_type)
             fd = open('%s/%s' % (PIC_DIR, file_name), 'wb')
             fd.write(image)
             fd.close()
