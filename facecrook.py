@@ -22,7 +22,6 @@ def get_http_headers(g_http_payload):
 
 
 def extract_image(headers, http_payload):
-    print("Extract image activated")
     image = None
     image_type = None
     try:
@@ -73,7 +72,6 @@ for session in sessions:
             pass
         headers = get_http_headers(http_payload)
         if headers is None:
-            print("headers is none")
             continue
         image, image_type = extract_image(headers, http_payload)
         if image is not None and image_type is not None:
