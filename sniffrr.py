@@ -3,7 +3,7 @@ facecrook.py
 Kyle Guss & Jesse Mazzella
 
 proof of concept
-packet sniffing for pictures of faces
+packet sniffing for pictures
 """
 
 from scapy.all import *
@@ -16,15 +16,25 @@ class Sniffrr():
         self.images_found = 0
         self.sniff_time = seconds
         self.packets = None
+        self.sniff_log = []
         self.directory = f"{os.environ['USERPROFILE']}/Desktop/SniffOutput"  # pic output path
 
     def __str__(self):
         return "Images_Found: {}, Seconds_Queued: {}".format(self.images_found, self.sniff_time)
 
     def AddSniff(self):
+        '''
+        adds 'sniff_time'
+        uses sniff time queue helps prevent extra sniffing
+        '''
         self.sniff_time += 15
 
     def TakeSniff(self):
+        '''
+        checks if 'sniff_time' > 0
+        sniffs on default interface
+        sets 'sniff_time' to 0
+        '''
         if self.sniff_time == 0:
             if self.packets is None:
                 print("No sniff time queued. No Packets stored yet.")
@@ -36,10 +46,16 @@ class Sniffrr():
 
     def CheckSniff(self):
         '''
-
-        :return:
+        loads packets from 'self.packets'
+        appends byte payloads from each packet to 'http_payload'
+        checks 'http_payload' for http headers
+        if 'headers' are found, attempts to pull out images from 'http_payload'
+        if 'image' found, store the image
         '''
-        sessions = self.packets.sessions()
+        try:
+            sessions = self.packets.sessions()
+        except Exception as e:
+            print(e)
 
         for session in sessions:
             http_payload = b''
@@ -49,10 +65,10 @@ class Sniffrr():
                         http_payload += bytes(packet[TCP].payload)
                 except:
                     pass
-                headers = self.get_http_headers(http_payload)
+                headers = self.__get_http_headers(http_payload)
                 if headers is None:
                     continue
-                image, image_type = self.extract_image(headers, http_payload)
+                image, image_type = self.__extract_image(headers, http_payload)
                 if image is not None and image_type is not None:
                     file_name = '{0}-pic-{1}.{2}'.format("packets", self.images_found, image_type)
                     file = open('%s/%s' % (self.directory, file_name), 'wb')
@@ -60,7 +76,13 @@ class Sniffrr():
                     file.close()
                     self.images_found += 1
 
-    def get_http_headers(self, payload_bytes):
+    def ClassifySniff(self):
+        '''
+        instructs classifier to analyze 'self.directory'
+        takes image classifications and appends them to 'self.sniff_log'
+        '''
+
+    def __get_http_headers(self, payload_bytes):
         '''
         finds and puts http headers into dictionary
         :param payload_bytes: bytes
@@ -76,7 +98,7 @@ class Sniffrr():
             return None
         return headers_bytes_parsed
 
-    def extract_image(self, headers, payload_bytes):
+    def __extract_image(self, headers, payload_bytes):
         '''
         :param headers: dictionary of headers
         :param payload_bytes: corresponding bytes for these headers
