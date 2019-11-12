@@ -7,7 +7,11 @@ packet sniffing for pictures
 """
 
 from scapy.all import *
-import zlib, scipy, numpy, os, re
+import zlib
+import scipy
+import numpy
+import os
+import re
 
 
 class Sniffrr():
@@ -17,10 +21,11 @@ class Sniffrr():
         self.sniff_time = seconds
         self.packets = None
         self.sniff_log = []
-        self.directory = f"{os.environ['USERPROFILE']}/Desktop/SniffOutput"  # pic output path
+        # pic output path
+        self.directory = f"{os.environ['USERPROFILE']}/Desktop/SniffOutput"
 
     def __str__(self):
-        return "Images_Found: {}, Seconds_Queued: {}".format(self.images_found, self.sniff_time)
+        return f"Images_Found: {self.images_found}, Seconds_Queued: {self.sniff_time}"
 
     def AddSniff(self):
         '''
@@ -70,7 +75,8 @@ class Sniffrr():
                     continue
                 image, image_type = self.__extract_image(headers, http_payload)
                 if image is not None and image_type is not None:
-                    file_name = '{0}-pic-{1}.{2}'.format("packets", self.images_found, image_type)
+                    file_name = '{0}-pic-{1}.{2}'.format(
+                        "packets", self.images_found, image_type)
                     file = open('%s/%s' % (self.directory, file_name), 'wb')
                     file.write(image)
                     file.close()
@@ -89,7 +95,8 @@ class Sniffrr():
         :return: dictionary of headers
         '''
         try:
-            headers_bytes_raw = payload_bytes[payload_bytes.index(b"HTTP/1.1"):payload_bytes.index(b"\r\n\r\n") + 2]
+            headers_bytes_raw = payload_bytes[payload_bytes.index(
+                b"HTTP/1.1"):payload_bytes.index(b"\r\n\r\n") + 2]
             headers_bytes_parsed = dict(
                 re.findall(r"(?P<name>.*?): (?P<value>.*?)\r\n", headers_bytes_raw.decode("utf8")))
         except Exception as e:
