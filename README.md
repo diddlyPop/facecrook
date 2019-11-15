@@ -1,38 +1,25 @@
-# facecrook
-gonna sniff ur face
+# Sniffrr
 
-(packet sniffing for pictures of faces)
+Embeddable packet-sniffing module that collects and analyzes photos sent over unsecured networks
 
-requires python3, scapy, npcap/winpcap/libpcap
+## Prerequisites
 
-opencv-python currently not available on python 3.8
-____________________________________________
+### Windows
+- [Python 3.7.5](https://www.python.org/downloads/release/python-375/)
+- [Npcap (v0.9984 at time of writing)](https://nmap.org/npcap/#download)
 
-currently:
-- collects byte data while sniffing port 80 (http traffic)
-- searches byte data for headers and content (specifically images)
-- parses byte data into images if present
-- writes images to output folder
+### MacOS
 
-hope to add:
-- other port sniffing options (like port for email credentials)
-- send images found to image classifier trained for facial recognition
-- send images found to image classifiers and print information found (whats in the pictures)
-- make more object oriented for use in other modules
+TODO
 
-____________________________________________
+### Linux
 
-import scapy & npcap on your machine
+TODO
 
-- make sure to run as admin for scapy to sniff (often gives interface error in PyCharm if not running as admin)
+## Installation
 
-- run in python shell:
-    ``` 
-        from scapy.all import *
-        get_if_list()
-    ```
-    should display available interfaces pulled from npcap/winpcap/libpcap
-    
-_____________________________________________
+In the project root directory, run:  
+`pip install -r requirements.txt`
 
-starting to change facecrook into a sniffing module called sniffrr, is a more OOP approach.
+To execute:  
+`python sniffrr.py`
