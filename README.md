@@ -4,6 +4,8 @@ gonna sniff ur face
 (packet sniffing for pictures of faces)
 
 requires python3, scapy, npcap/winpcap/libpcap
+
+opencv-python currently not available on python 3.8
 ____________________________________________
 
 currently:
