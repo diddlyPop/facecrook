@@ -163,8 +163,16 @@ class Sniffrr():
 
     def __face_detect(self, file_name):
         print("Attempted face detect")
-        img = cv2.imread("{}/{}".format(self.directory, file_name))
-        cascade = cv2.CascadeClassifier("C:\\Users\\kyleg\\Desktop\\facecrook\\cascades\\haarcascade_frontalface_default.xml")
+        img = cv2.imread(f"{self.directory}/{file_name}")
+        
+        # Get path to this file
+        file_dir = os.path.dirname(__file__)
+        
+        # Relative path to cascade file
+        cascade_path = "../cascades/haarcascade_frontalface_default.xml"
+
+        # TODO: handle case where folder does not already exist
+        cascade = cv2.CascadeClassifier(os.join(file_dir, cascade_path))
         rects = cascade.detectMultiScale(img, 1.3, 4, cv2.CASCADE_SCALE_IMAGE, (20, 20))
 
         if len(rects) == 0:
@@ -177,7 +185,7 @@ class Sniffrr():
         for x1, y1, x2, y2 in rects:
             cv2.rectangle(img, (x1, y1), (x2, y2), (127, 255, 0), 2)
 
-        cv2.imwrite("{}/{}-{}".format(self.directory, "faces", file_name), img)
+        cv2.imwrite(f"{self.directory}/faces-{file_name}", img)
 
         return True
 
