@@ -24,8 +24,15 @@ class Sniffrr():
         self.packets = None
         self.sniff_log = []
         self.credentials = []
-        # pic output path
-        self.directory = f"{os.environ['USERPROFILE']}/Desktop/SniffOutput"
+        # Construct picture output path
+
+        # Windows
+        if 'USERPROFILE' in os.environ:
+            self.directory = f"{os.environ['USERPROFILE']}/Desktop/SniffOutput"
+        # Unix/MacOS
+        elif 'HOME' in os.environ:
+            self.directory = f"{os.environ['HOME']}/Desktop/SniffOutput"
+            
 
     def __str__(self):
         return f"Images: {self.images_found}, Seconds: {self.sniff_time}, Credentials: {self.credentials}, Faces: {self.faces_found}"
@@ -125,7 +132,7 @@ class Sniffrr():
                 b"HTTP/1.1"):payload_bytes.index(b"\r\n\r\n") + 2]
             headers_bytes_parsed = dict(
                 re.findall(r"(?P<name>.*?): (?P<value>.*?)\r\n", headers_bytes_raw.decode("utf8")))
-        except Exception as e:
+        except:
             return None
         if 'Content-Type' not in headers_bytes_parsed.keys():
             return None
@@ -169,10 +176,17 @@ class Sniffrr():
         file_dir = os.path.dirname(__file__)
         
         # Relative path to cascade file
-        cascade_path = "../cascades/haarcascade_frontalface_default.xml"
+        classifier_path = "../cascades/"
+        classifier_file = "haarcascade_frontalface_default.xml"
 
-        # TODO: handle case where folder does not already exist
-        cascade = cv2.CascadeClassifier(os.join(file_dir, cascade_path))
+        # Build classifier path
+        classifier_path = os.path.join(file_dir, classifier_path)
+
+        # If folder doesn't exist already, create it
+        if not os.path.exists():
+            os.mkdir(classifier_path)
+
+        cascade = cv2.CascadeClassifier(os.path.join(classifier_path, classifier_file))
         rects = cascade.detectMultiScale(img, 1.3, 4, cv2.CASCADE_SCALE_IMAGE, (20, 20))
 
         if len(rects) == 0:
